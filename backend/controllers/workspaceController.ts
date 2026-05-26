@@ -4,6 +4,7 @@ import { Task } from '../models/Task';
 import { ChatHistory } from '../models/ChatHistory';
 import { scrapeUrlText } from '../utils/scraper';
 import { generateActionTasks } from '../services/aiService';
+import { ExecutionLog, IExecutionStep } from '../models/ExecutionLog';
 export const getWorkspaces = async (_req: Request, res: Response) => {
   try {
     const workspaces = await Workspace.find({});
@@ -124,10 +125,24 @@ import OpenAI from 'openai';
 const openai = new OpenAI();
 
 export const executeWorkflow = async (req: Request, res: Response): Promise<any> => {
+  const startTime = Date.now();
+  const workspaceId = req.params.id || 'default';
+  const workflowName = req.body.workflowName || 'Custom Workflow';
+  const steps: IExecutionStep[] = [];
+  let status: 'success' | 'failed' = 'success';
+
   try {
     const { nodes } = req.body;
 
     if (!nodes || !Array.isArray(nodes)) {
+      status = 'failed';
+      await ExecutionLog.create({
+        workspaceId,
+        workflowName,
+        status,
+        totalTimeMs: Date.now() - startTime,
+        steps
+      });
       return res.status(400).json({ success: false, error: 'Nodes array is required' });
     }
 
@@ -135,30 +150,67 @@ export const executeWorkflow = async (req: Request, res: Response): Promise<any>
 
     for (const node of nodes) {
       console.log(`Executing node: ${node.id} (${node.type})`);
+      const stepStart = new Date();
+      const stepInput = JSON.parse(JSON.stringify(resultData)); // Deep copy to prevent mutation
       
-      if (node.type === 'openai') {
-        const completion = await openai.chat.completions.create({
-          model: 'gpt-4o',
-          messages: [
-            { role: 'system', content: 'You are an AI assistant processing workflow data. Always respond in valid JSON format.' },
-            { role: 'user', content: node.data?.prompt || 'Process the following data: ' + JSON.stringify(resultData) }
-          ],
-          response_format: { type: 'json_object' }
+      try {
+        if (node.type === 'openai') {
+          const completion = await openai.chat.completions.create({
+            model: 'gpt-4o',
+            messages: [
+              { role: 'system', content: 'You are an AI assistant processing workflow data. Always respond in valid JSON format.' },
+              { role: 'user', content: node.data?.prompt || 'Process the following data: ' + JSON.stringify(resultData) }
+            ],
+            response_format: { type: 'json_object' }
+          });
+          
+          resultData = JSON.parse(completion.choices[0].message.content || '{}');
+        } else if (node.type === 'scraper') {
+          // Here you would call your scraper.ts utility or similar
+          resultData = { scrapedUrl: node.data?.url, status: 'simulated success', previous: resultData };
+        } else if (node.type === 'trigger') {
+          // Handle trigger logic
+          resultData = { triggerData: node.data, timestamp: new Date().toISOString() };
+        }
+
+        steps.push({
+          nodeName: node.type,
+          input: stepInput,
+          output: resultData,
+          timestamp: stepStart
         });
-        
-        resultData = JSON.parse(completion.choices[0].message.content || '{}');
-      } else if (node.type === 'scraper') {
-        // Here you would call your scraper.ts utility or similar
-        resultData = { scrapedUrl: node.data?.url, status: 'simulated success', previous: resultData };
-      } else if (node.type === 'trigger') {
-        // Handle trigger logic
-        resultData = { triggerData: node.data, timestamp: new Date().toISOString() };
+      } catch (nodeError: any) {
+        steps.push({
+          nodeName: node.type,
+          input: stepInput,
+          output: { error: nodeError.message },
+          timestamp: stepStart
+        });
+        throw nodeError; // Rethrow to break loop and trigger main catch
       }
     }
+
+    await ExecutionLog.create({
+      workspaceId,
+      workflowName,
+      status,
+      totalTimeMs: Date.now() - startTime,
+      steps
+    });
 
     return res.status(200).json({ success: true, data: resultData });
   } catch (error: any) {
     console.error('Error executing workflow:', error);
+    status = 'failed';
+    
+    await ExecutionLog.create({
+      workspaceId,
+      workflowName,
+      status,
+      totalTimeMs: Date.now() - startTime,
+      steps
+    });
+
     return res.status(500).json({ success: false, error: error.message || 'Internal server error' });
   }
 };

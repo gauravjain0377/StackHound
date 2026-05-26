@@ -2,11 +2,7 @@ import { Navbar } from '@/components/landing/Navbar';
 import { HeroSection } from '@/components/landing/HeroSection';
 import { StatsSection } from '@/components/landing/StatsSection';
 import { BentoSection } from '@/components/landing/BentoSection';
-import { DeveloperSection } from '@/components/landing/DeveloperSection';
 import { ScrollSection } from '@/components/landing/ScrollSection';
-import { IntegrationsSection } from '@/components/landing/IntegrationsSection';
-import { TestimonialsSection } from '@/components/landing/TestimonialsSection';
-import { PricingSection } from '@/components/landing/PricingSection';
 import { FAQSection } from '@/components/landing/FAQSection';
 import { CTASection } from '@/components/landing/CTASection';
 import { Footer } from '@/components/landing/Footer';
@@ -23,11 +19,7 @@ export default function HomePage() {
       <HeroSection />
       <StatsSection />
       <BentoSection />
-      <DeveloperSection />
       <ScrollSection />
-      <IntegrationsSection />
-      <TestimonialsSection />
-      <PricingSection />
       <FAQSection />
       <CTASection />
       <Footer />
