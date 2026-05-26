@@ -17,12 +17,16 @@ import 'reactflow/dist/style.css';
 import { useCallback, useState } from 'react';
 
 import { TriggerNode } from './nodes/TriggerNode';
+import { WebhookTriggerNode } from './nodes/WebhookTriggerNode';
+import { ScheduleTriggerNode } from './nodes/ScheduleTriggerNode';
 import { ScraperNode } from './nodes/ScraperNode';
 import { OpenAINode } from './nodes/OpenAINode';
 
 // Register custom node types
 const nodeTypes = {
   trigger: TriggerNode,
+  webhook: WebhookTriggerNode,
+  schedule: ScheduleTriggerNode,
   scraper: ScraperNode,
   openai: OpenAINode,
 };
@@ -242,7 +246,7 @@ export function WorkflowCanvas({ defaultNodes, defaultEdges }: { defaultNodes?: 
         <MiniMap
           className="wf-minimap"
           nodeColor={(n) => {
-            if (n.type === 'trigger') return '#eab308';
+            if (n.type === 'trigger' || n.type === 'webhook' || n.type === 'schedule') return '#eab308';
             if (n.type === 'scraper') return '#06b6d4';
             if (n.type === 'openai') return '#10b981';
             return '#52525b';

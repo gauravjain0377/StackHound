@@ -89,6 +89,13 @@ const Icons = {
       <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
     </svg>
   ),
+  history: (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="12 8 12 12 14 14" />
+      <path d="M3.05 11a9 9 0 1 0 .5-4" />
+      <polyline points="3 3 3 7 7 7" />
+    </svg>
+  ),
 };
 
 // ─── Nav Items ────────────────────────────────────────────────────────────────
@@ -97,7 +104,8 @@ const NAV_ITEMS = [
   { label: 'Home',      href: '/dashboard',           icon: Icons.home },
   { label: 'Dashboard', href: '/dashboard/stats',     icon: Icons.dashboard },
   { label: 'Recipes',   href: '/dashboard/recipes',   icon: Icons.recipes },
-  { label: 'Workflows', href: '/dashboard/workflow', icon: Icons.workflows },
+  { label: 'Workflows', href: '/dashboard/workflow',  icon: Icons.workflows },
+  { label: 'History',   href: '/dashboard/history',   icon: Icons.history },
   { label: 'Nodes',     href: '/dashboard/nodes',     icon: Icons.nodes },
   { label: 'Inbox',     href: '/dashboard/inbox',     icon: Icons.inbox },
   { label: 'Search',    href: '/dashboard/search',    icon: Icons.search },

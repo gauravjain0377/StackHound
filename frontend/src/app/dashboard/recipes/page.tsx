@@ -1,140 +1,141 @@
-import Link from 'next/link';
+'use client';
 
-export const metadata = {
-  title: 'Recipes — StackHound',
-  description: 'Pre-built workflow templates to kickstart your automation.',
-};
+import { useEffect, useState } from 'react';
+import { RecipeCard } from '@/components/RecipeCard';
 
-const RECIPES = [
-  {
-    id: 'competitor-analysis',
-    title: 'Competitor Analysis',
-    description: 'Automatically monitor competitor pricing pages and extract daily changes using AI.',
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-        <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-        <line x1="12" y1="22.08" x2="12" y2="12" />
-      </svg>
-    ),
-  },
-  {
-    id: 'seo-audit',
-    title: 'SEO Audit',
-    description: 'Weekly scheduled scrape of your target pages to analyze meta tags and SEO health.',
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="11" cy="11" r="8" />
-        <line x1="21" y1="21" x2="16.65" y2="16.65" />
-        <line x1="11" y1="8" x2="11" y2="14" />
-        <line x1="8" y1="11" x2="14" y2="11" />
-      </svg>
-    ),
-  },
-  {
-    id: 'cold-email-scraper',
-    title: 'Cold Email Scraper',
-    description: 'Extract decision-maker roles and names from target company "About Us" pages.',
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-        <polyline points="22,6 12,13 2,6" />
-      </svg>
-    ),
-  },
-];
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface Recipe {
+  _id: string;
+  title: string;
+  description: string;
+  icon: string;
+}
+
+// ─── Skeleton Card ────────────────────────────────────────────────────────────
+
+function SkeletonCard() {
+  return (
+    <div
+      style={{
+        backgroundColor: '#18181B',
+        border: '1px solid #27272a',
+        borderRadius: '12px',
+        padding: '20px',
+        minHeight: '200px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '12px',
+      }}
+    >
+      <div style={{ width: '44px', height: '44px', borderRadius: '10px', background: '#27272a', animation: 'pulse 1.5s ease-in-out infinite' }} />
+      <div style={{ width: '60%', height: '16px', borderRadius: '6px', background: '#27272a', animation: 'pulse 1.5s ease-in-out infinite' }} />
+      <div style={{ width: '90%', height: '12px', borderRadius: '6px', background: '#27272a', animation: 'pulse 1.5s ease-in-out 0.2s infinite' }} />
+      <div style={{ width: '75%', height: '12px', borderRadius: '6px', background: '#27272a', animation: 'pulse 1.5s ease-in-out 0.4s infinite' }} />
+    </div>
+  );
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function RecipesPage() {
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchRecipes = async () => {
+      try {
+        const res = await fetch('http://localhost:3001/api/recipes');
+        if (!res.ok) throw new Error(`Server error: ${res.status}`);
+        const json = await res.json();
+        setRecipes(json.data ?? []);
+      } catch (err: any) {
+        setError(err.message ?? 'Failed to load recipes');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchRecipes();
+  }, []);
+
   return (
     <div style={{ backgroundColor: '#000000', minHeight: '100vh', color: '#ffffff' }}>
-      {/* ── Top bar ───────────────────────────────────────────────────────── */}
-      <div className="dashboard-topbar" style={{ borderBottom: '1px solid #27272a', padding: '16px 24px' }}>
-        <div className="topbar-breadcrumb">
+      {/* ── Top bar ──────────────────────────────────────────────────────────── */}
+      <div style={{ borderBottom: '1px solid #27272a', padding: '16px 24px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#52525b' }}>
           <span>Dashboard</span>
-          <span className="topbar-breadcrumb-sep" style={{ margin: '0 8px', color: '#52525b' }}>/</span>
-          <span className="topbar-breadcrumb-current">Recipes</span>
+          <span>/</span>
+          <span style={{ color: '#a1a1aa' }}>Recipes</span>
         </div>
       </div>
 
-      {/* ── Strict 20px gap below header ──────────────────────────────────── */}
-      <div style={{ marginTop: '20px', padding: '0 24px' }}>
+      <div style={{ padding: '24px' }}>
+        {/* ── Header ─────────────────────────────────────────────────────────── */}
         <div style={{ marginBottom: '32px' }}>
-          <h1 style={{ fontSize: '24px', fontWeight: '600', margin: '0 0 8px 0' }}>Template Library</h1>
-          <p style={{ color: '#a1a1aa', margin: 0 }}>Start with a pre-built workflow recipe to accelerate your automations.</p>
+          <h1 style={{ fontSize: '22px', fontWeight: 600, margin: '0 0 6px 0', letterSpacing: '-0.02em', color: '#f4f4f5' }}>
+            Template Library
+          </h1>
+          <p style={{ color: '#52525b', margin: 0, fontSize: '14px' }}>
+            Start with a pre-built workflow recipe to accelerate your automations.
+          </p>
         </div>
 
-        {/* ── Grid ──────────────────────────────────────────────────────── */}
+        {/* ── Error State ─────────────────────────────────────────────────────── */}
+        {error && (
+          <div style={{
+            backgroundColor: 'rgba(239,68,68,0.08)',
+            border: '1px solid rgba(239,68,68,0.2)',
+            borderRadius: '10px',
+            padding: '16px 20px',
+            color: '#f87171',
+            fontSize: '14px',
+            marginBottom: '24px',
+          }}>
+            ⚠ {error}
+          </div>
+        )}
+
+        {/* ── Empty State ─────────────────────────────────────────────────────── */}
+        {!loading && !error && recipes.length === 0 && (
+          <div style={{
+            textAlign: 'center',
+            padding: '80px 20px',
+            color: '#52525b',
+          }}>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: '16px', color: '#27272a' }}>
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+            </svg>
+            <p style={{ margin: 0, fontSize: '14px' }}>No recipes yet. Seed the database to get started.</p>
+          </div>
+        )}
+
+        {/* ── Grid ────────────────────────────────────────────────────────────── */}
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-            gap: '24px',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+            gap: '16px',
           }}
         >
-          {RECIPES.map((recipe) => (
-            <Link
-              key={recipe.id}
-              href={`/dashboard/workflow?recipe=${recipe.id}`}
-              style={{ textDecoration: 'none' }}
-              className="recipe-card-link"
-            >
-              <div
-                className="recipe-card"
-                style={{
-                  backgroundColor: '#09090b', // slightly elevated from pure black
-                  border: '1px solid #27272a',
-                  borderRadius: '12px',
-                  padding: '24px',
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  transition: 'border-color 0.2s, transform 0.2s, box-shadow 0.2s',
-                }}
-              >
-                <div
-                  className="recipe-icon-wrapper"
-                  style={{
-                    width: '48px',
-                    height: '48px',
-                    borderRadius: '8px',
-                    backgroundColor: 'rgba(6, 182, 212, 0.1)',
-                    color: '#06b6d4', // Tech Blue
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginBottom: '16px',
-                    transition: 'background-color 0.2s',
-                  }}
-                >
-                  {recipe.icon}
-                </div>
-                <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#f4f4f5', margin: '0 0 8px 0' }}>
-                  {recipe.title}
-                </h3>
-                <p style={{ fontSize: '14px', color: '#a1a1aa', margin: '0 0 24px 0', lineHeight: '1.5', flexGrow: 1 }}>
-                  {recipe.description}
-                </p>
-                <div style={{ display: 'flex', alignItems: 'center', color: '#06b6d4', fontSize: '14px', fontWeight: '500' }}>
-                  Use Template
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: '4px' }}>
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                    <polyline points="12 5 19 12 12 19" />
-                  </svg>
-                </div>
-              </div>
-            </Link>
-          ))}
+          {loading
+            ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
+            : recipes.map((recipe) => (
+                <RecipeCard
+                  key={recipe._id}
+                  id={recipe._id}
+                  title={recipe.title}
+                  description={recipe.description}
+                  icon={recipe.icon}
+                />
+              ))}
         </div>
       </div>
 
       <style>{`
-        .recipe-card-link .recipe-card:hover {
-          border-color: #06b6d4 !important;
-          transform: translateY(-2px);
-          box-shadow: 0 8px 24px rgba(6, 182, 212, 0.1);
-        }
-        .recipe-card-link .recipe-card:hover .recipe-icon-wrapper {
-          background-color: rgba(6, 182, 212, 0.2) !important;
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.4; }
         }
       `}</style>
     </div>
