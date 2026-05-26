@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { useAuth } from '@clerk/nextjs';
 
 const NAV_LINKS = [
   { label: 'Features', href: '#features' },
@@ -13,6 +14,7 @@ const NAV_LINKS = [
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const { isSignedIn } = useAuth();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -88,42 +90,69 @@ export function Navbar() {
 
       {/* CTAs */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
-        <Link href="/sign-in" style={{
-          padding: '7px 16px',
-          fontSize: '13px',
-          fontWeight: 500,
-          color: 'rgba(255,255,255,0.6)',
-          textDecoration: 'none',
-          borderRadius: '8px',
-          transition: 'color 150ms',
-        }}
-        onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = '#fff'}
-        onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.6)'}
-        >
-          Sign in
-        </Link>
-        <Link href="/sign-up" style={{
-          padding: '7px 18px',
-          fontSize: '13px',
-          fontWeight: 600,
-          color: '#000',
-          background: '#fff',
-          textDecoration: 'none',
-          borderRadius: '8px',
-          transition: 'background 150ms, box-shadow 150ms',
-          letterSpacing: '-0.01em',
-        }}
-        onMouseEnter={e => {
-          (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.9)';
-          (e.currentTarget as HTMLElement).style.boxShadow = '0 0 20px rgba(255,255,255,0.2)';
-        }}
-        onMouseLeave={e => {
-          (e.currentTarget as HTMLElement).style.background = '#fff';
-          (e.currentTarget as HTMLElement).style.boxShadow = 'none';
-        }}
-        >
-          Get started
-        </Link>
+        {isSignedIn ? (
+          <Link href="/dashboard" style={{
+            padding: '7px 18px',
+            fontSize: '13px',
+            fontWeight: 600,
+            color: '#000',
+            background: '#fff',
+            textDecoration: 'none',
+            borderRadius: '8px',
+            transition: 'background 150ms, box-shadow 150ms',
+            letterSpacing: '-0.01em',
+          }}
+          onMouseEnter={e => {
+            (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.9)';
+            (e.currentTarget as HTMLElement).style.boxShadow = '0 0 20px rgba(255,255,255,0.2)';
+          }}
+          onMouseLeave={e => {
+            (e.currentTarget as HTMLElement).style.background = '#fff';
+            (e.currentTarget as HTMLElement).style.boxShadow = 'none';
+          }}
+          >
+            Go to Dashboard
+          </Link>
+        ) : (
+          <>
+            <Link href="/sign-in" style={{
+              padding: '7px 16px',
+              fontSize: '13px',
+              fontWeight: 500,
+              color: 'rgba(255,255,255,0.6)',
+              textDecoration: 'none',
+              borderRadius: '8px',
+              transition: 'color 150ms',
+            }}
+            onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = '#fff'}
+            onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.6)'}
+            >
+              Sign in
+            </Link>
+            <Link href="/sign-up" style={{
+              padding: '7px 18px',
+              fontSize: '13px',
+              fontWeight: 600,
+              color: '#000',
+              background: '#fff',
+              textDecoration: 'none',
+              borderRadius: '8px',
+              transition: 'background 150ms, box-shadow 150ms',
+              letterSpacing: '-0.01em',
+            }}
+            onMouseEnter={e => {
+              (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.9)';
+              (e.currentTarget as HTMLElement).style.boxShadow = '0 0 20px rgba(255,255,255,0.2)';
+            }}
+            onMouseLeave={e => {
+              (e.currentTarget as HTMLElement).style.background = '#fff';
+              (e.currentTarget as HTMLElement).style.boxShadow = 'none';
+            }}
+            >
+              Get started
+            </Link>
+          </>
+        )}
       </div>
     </motion.header>
   );

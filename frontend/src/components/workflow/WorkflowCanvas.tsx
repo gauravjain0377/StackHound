@@ -106,9 +106,9 @@ const initialEdges: Edge[] = [
 ];
 
 // ── Component ─────────────────────────────────────────────────────────────────
-export function WorkflowCanvas() {
-  const [nodes, , onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+export function WorkflowCanvas({ defaultNodes, defaultEdges }: { defaultNodes?: Node[], defaultEdges?: Edge[] }) {
+  const [nodes, , onNodesChange] = useNodesState(defaultNodes || initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(defaultEdges || initialEdges);
   const [isExecuting, setIsExecuting] = useState(false);
 
   const onConnect = useCallback(
