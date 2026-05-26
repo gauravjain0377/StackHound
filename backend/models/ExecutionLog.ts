@@ -1,41 +1,57 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Types } from 'mongoose';
+
+// ─── Step Sub-Schema ──────────────────────────────────────────────────────────
 
 export interface IExecutionStep {
+  nodeId: string;
   nodeName: string;
-  input: any;
-  output: any;
-  timestamp: Date;
+  inputData: Record<string, any>;
+  outputData: Record<string, any>;
+  error?: string;
+  duration: number; // milliseconds
 }
 
+// ─── ExecutionLog Interface ───────────────────────────────────────────────────
+
 export interface IExecutionLog extends Document {
-  workspaceId: string;
-  workflowName: string;
-  status: 'success' | 'failed';
-  totalTimeMs: number;
+  workspaceId: Types.ObjectId | string;
+  workflowId?: Types.ObjectId | string;
+  status: 'running' | 'success' | 'failed';
+  startedAt: Date;
+  completedAt?: Date;
   steps: IExecutionStep[];
   createdAt: Date;
   updatedAt: Date;
 }
 
-const ExecutionStepSchema = new Schema(
+// ─── Step Sub-Schema Definition ───────────────────────────────────────────────
+
+const ExecutionStepSchema = new Schema<IExecutionStep>(
   {
-    nodeName: { type: String, required: true },
-    input: { type: Schema.Types.Mixed },
-    output: { type: Schema.Types.Mixed },
-    timestamp: { type: Date, default: Date.now },
+    nodeId:     { type: String, required: true },
+    nodeName:   { type: String, required: true },
+    inputData:  { type: Schema.Types.Mixed, default: {} },
+    outputData: { type: Schema.Types.Mixed, default: {} },
+    error:      { type: String },
+    duration:   { type: Number, required: true, default: 0 },
   },
   { _id: false }
 );
 
-const ExecutionLogSchema = new Schema(
+// ─── ExecutionLog Schema Definition ──────────────────────────────────────────
+
+const ExecutionLogSchema = new Schema<IExecutionLog>(
   {
-    workspaceId: { type: String, required: true },
-    workflowName: { type: String, required: true, default: 'Custom Workflow' },
-    status: { type: String, enum: ['success', 'failed'], required: true },
-    totalTimeMs: { type: Number, required: true },
-    steps: [ExecutionStepSchema],
+    workspaceId: { type: Schema.Types.Mixed, required: true },
+    workflowId:  { type: Schema.Types.ObjectId, ref: 'Workflow', required: false },
+    status:      { type: String, enum: ['running', 'success', 'failed'], required: true, default: 'running' },
+    startedAt:   { type: Date, required: true, default: Date.now },
+    completedAt: { type: Date },
+    steps:       { type: [ExecutionStepSchema], default: [] },
   },
   { timestamps: true }
 );
 
-export const ExecutionLog = mongoose.models.ExecutionLog || mongoose.model<IExecutionLog>('ExecutionLog', ExecutionLogSchema);
+export const ExecutionLog =
+  mongoose.models.ExecutionLog ||
+  mongoose.model<IExecutionLog>('ExecutionLog', ExecutionLogSchema);
