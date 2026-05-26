@@ -26,7 +26,14 @@ export const clerkAppearance: Appearance = {
     fontFamily: `'Inter', system-ui, -apple-system, sans-serif`,
     fontSize: '14px',
   },
+  layout: {
+    logoPlacement: 'none',
+    showOptionalFields: false,
+  },
   elements: {
+    watermark: {
+      display: 'none',
+    },
     // ── Card ──────────────────────────────────────────────
     card: {
       backgroundColor: '#09090B',

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
 import { ClerkProvider } from '@clerk/nextjs';
+import { clerkAppearance } from '@/lib/clerkAppearance';
 import './globals.css';
 
 const inter = Inter({
@@ -27,7 +28,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider signInFallbackRedirectUrl="/dashboard" signUpFallbackRedirectUrl="/dashboard">
+    <ClerkProvider appearance={clerkAppearance} signInFallbackRedirectUrl="/dashboard" signUpFallbackRedirectUrl="/dashboard">
       <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}>
         <body className="min-h-full flex flex-col">{children}</body>
       </html>
