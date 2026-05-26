@@ -137,7 +137,7 @@ function IntegrationBadge({ icon, label }: { icon: React.ReactNode; label: strin
       border: '1px solid rgba(255,255,255,0.07)',
       borderRadius: '99px',
       fontSize: '12px',
-      color: 'rgba(255,255,255,0.4)',
+      color: 'rgba(255,255,255,0.55)',
       cursor: 'pointer',
       transition: 'background 150ms, border-color 150ms, color 150ms',
     }}
@@ -295,7 +295,7 @@ export default function DashboardPage() {
         gap: '10px',
         flexWrap: 'wrap',
       }}>
-        <span style={{ fontSize: '12.5px', color: 'rgba(255,255,255,0.3)', marginRight: '4px' }}>
+        <span style={{ fontSize: '12.5px', color: 'rgba(255,255,255,0.45)', marginRight: '4px' }}>
           Connect your stack
         </span>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -363,7 +363,7 @@ export default function DashboardPage() {
               {' '}today?
             </h1>
 
-            <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.3)', lineHeight: 1.6 }}>
+            <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.5)', lineHeight: 1.6 }}>
               Paste a URL, and StackHound will autonomously analyze it.
             </p>
           </motion.div>
@@ -463,7 +463,7 @@ export default function DashboardPage() {
                     </button>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.2)' }}>
+                      <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.35)' }}>
                         Enter to send · Shift+Enter for newline
                       </span>
                       <button
@@ -501,13 +501,13 @@ export default function DashboardPage() {
               justifyContent: 'space-between',
               marginBottom: '16px',
             }}>
-              <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.25)', fontWeight: 500, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+              <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', fontWeight: 500, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
                 Recent tasks
               </p>
               {!isLoading && (
                 <span style={{
                   fontSize: '11px',
-                  color: 'rgba(255,255,255,0.2)',
+                  color: 'rgba(255,255,255,0.35)',
                   background: 'rgba(255,255,255,0.04)',
                   border: '1px solid rgba(255,255,255,0.07)',
                   borderRadius: '99px',
@@ -532,7 +532,7 @@ export default function DashboardPage() {
                   padding: '40px 20px',
                   border: '1px dashed rgba(255,255,255,0.08)',
                   borderRadius: '16px',
-                  color: 'rgba(255,255,255,0.25)',
+                  color: 'rgba(255,255,255,0.4)',
                   fontSize: '13.5px',
                   lineHeight: 1.6,
                 }}>

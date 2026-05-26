@@ -8,8 +8,8 @@ import { useAuth } from '@clerk/nextjs';
 const NAV_LINKS = [
   { label: 'Features', href: '#features' },
   { label: 'How It Works', href: '#how-it-works' },
-  { label: 'Pricing', href: '#pricing' },
-  { label: 'Blog', href: '/blog' },
+  { label: 'Docs', href: '/docs', external: true },
+  { label: 'Blog', href: '/blog', external: true },
 ];
 
 export function Navbar() {
@@ -65,7 +65,9 @@ export function Navbar() {
       {/* Nav links */}
       <nav style={{ display: 'flex', alignItems: 'center', gap: '4px', margin: '0 auto' }}>
         {NAV_LINKS.map((link) => (
-          <Link key={link.label} href={link.href} style={{
+          <Link key={link.label} href={link.href}
+            {...(link.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+            style={{
             padding: '6px 14px',
             fontSize: '13.5px',
             fontWeight: 450,
@@ -73,6 +75,9 @@ export function Navbar() {
             textDecoration: 'none',
             borderRadius: '8px',
             transition: 'color 150ms, background 150ms',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
           }}
           onMouseEnter={e => {
             (e.currentTarget as HTMLElement).style.color = '#fff';
@@ -84,6 +89,13 @@ export function Navbar() {
           }}
           >
             {link.label}
+            {link.external && (
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5 }}>
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+            )}
           </Link>
         ))}
       </nav>

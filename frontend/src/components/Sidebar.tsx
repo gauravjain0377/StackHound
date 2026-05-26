@@ -1,7 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useUser, useClerk } from '@clerk/nextjs';
+import { useState, useRef, useEffect } from 'react';
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
@@ -20,14 +22,6 @@ const Icons = {
       <polyline points="9 22 9 12 15 12 15 22" />
     </svg>
   ),
-  dashboard: (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="3" width="7" height="7" rx="1" />
-      <rect x="14" y="3" width="7" height="7" rx="1" />
-      <rect x="14" y="14" width="7" height="7" rx="1" />
-      <rect x="3" y="14" width="7" height="7" rx="1" />
-    </svg>
-  ),
   recipes: (
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
@@ -43,18 +37,6 @@ const Icons = {
       <line x1="12" y1="7" x2="12" y2="13" />
       <line x1="12" y1="13" x2="5" y2="17" />
       <line x1="12" y1="13" x2="19" y2="17" />
-    </svg>
-  ),
-  inbox: (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
-      <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
-    </svg>
-  ),
-  search: (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="11" cy="11" r="8" />
-      <line x1="21" y1="21" x2="16.65" y2="16.65" />
     </svg>
   ),
   docs: (
@@ -84,16 +66,43 @@ const Icons = {
       <line x1="18" y1="18" x2="14.5" y2="13.5" />
     </svg>
   ),
-  zap: (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-    </svg>
-  ),
   history: (
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <polyline points="12 8 12 12 14 14" />
       <path d="M3.05 11a9 9 0 1 0 .5-4" />
       <polyline points="3 3 3 7 7 7" />
+    </svg>
+  ),
+  externalLink: (
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+      <polyline points="15 3 21 3 21 9" />
+      <line x1="10" y1="14" x2="21" y2="3" />
+    </svg>
+  ),
+  chevronUpDown: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="7 15 12 20 17 15" />
+      <polyline points="7 9 12 4 17 9" />
+    </svg>
+  ),
+  user: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
+  ),
+  settings: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="3" />
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+    </svg>
+  ),
+  logout: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+      <polyline points="16 17 21 12 16 7" />
+      <line x1="21" y1="12" x2="9" y2="12" />
     </svg>
   ),
 };
@@ -102,32 +111,139 @@ const Icons = {
 
 const NAV_ITEMS = [
   { label: 'Home',      href: '/dashboard',           icon: Icons.home },
-  { label: 'Dashboard', href: '/dashboard/stats',     icon: Icons.dashboard },
   { label: 'Recipes',   href: '/dashboard/recipes',   icon: Icons.recipes },
   { label: 'Workflows', href: '/dashboard/workflow',  icon: Icons.workflows },
   { label: 'History',   href: '/dashboard/history',   icon: Icons.history },
   { label: 'Nodes',     href: '/dashboard/nodes',     icon: Icons.nodes },
-  { label: 'Inbox',     href: '/dashboard/inbox',     icon: Icons.inbox },
-  { label: 'Search',    href: '/dashboard/search',    icon: Icons.search },
 ];
+
+// ─── Profile Dropdown ─────────────────────────────────────────────────────────
+
+function ProfileDropdown({ onClose }: { onClose: () => void }) {
+  const { signOut } = useClerk();
+  const router = useRouter();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        onClose();
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [onClose]);
+
+  const menuItems = [
+    {
+      icon: Icons.user,
+      label: 'Profile',
+      onClick: () => { router.push('/dashboard/settings'); onClose(); },
+    },
+    {
+      icon: Icons.settings,
+      label: 'Settings',
+      onClick: () => { router.push('/dashboard/settings'); onClose(); },
+    },
+    {
+      icon: Icons.logout,
+      label: 'Sign out',
+      onClick: () => { signOut(() => router.push('/')); },
+      danger: true,
+    },
+  ];
+
+  return (
+    <div
+      ref={dropdownRef}
+      style={{
+        position: 'absolute',
+        bottom: '100%',
+        left: '8px',
+        right: '8px',
+        marginBottom: '6px',
+        background: '#111113',
+        border: '1px solid rgba(255,255,255,0.08)',
+        borderRadius: '12px',
+        padding: '4px',
+        zIndex: 100,
+        boxShadow: '0 -8px 32px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.03)',
+        animation: 'slideUp 0.15s ease-out',
+      }}
+    >
+      {menuItems.map((item, i) => (
+        <button
+          key={item.label}
+          onClick={item.onClick}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            width: '100%',
+            padding: '9px 12px',
+            background: 'transparent',
+            border: 'none',
+            borderRadius: '8px',
+            color: item.danger ? '#f87171' : 'rgba(255,255,255,0.6)',
+            fontSize: '13px',
+            fontWeight: 500,
+            cursor: 'pointer',
+            transition: 'background 120ms, color 120ms',
+            fontFamily: 'inherit',
+            textAlign: 'left',
+            borderTop: i === menuItems.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none',
+            marginTop: i === menuItems.length - 1 ? '4px' : '0',
+            paddingTop: i === menuItems.length - 1 ? '12px' : '9px',
+          }}
+          onMouseEnter={e => {
+            (e.currentTarget as HTMLElement).style.background = item.danger
+              ? 'rgba(248,113,113,0.08)'
+              : 'rgba(255,255,255,0.05)';
+            (e.currentTarget as HTMLElement).style.color = item.danger
+              ? '#f87171'
+              : 'rgba(255,255,255,0.9)';
+          }}
+          onMouseLeave={e => {
+            (e.currentTarget as HTMLElement).style.background = 'transparent';
+            (e.currentTarget as HTMLElement).style.color = item.danger
+              ? '#f87171'
+              : 'rgba(255,255,255,0.6)';
+          }}
+        >
+          {item.icon}
+          {item.label}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-import { UserButton } from '@clerk/nextjs';
-import { clerkAppearance } from '@/lib/clerkAppearance';
-
 export function Sidebar() {
   const pathname = usePathname();
+  const { user } = useUser();
+  const [showDropdown, setShowDropdown] = useState(false);
 
   const isActive = (href: string) => {
     if (href === '/dashboard') return pathname === '/dashboard' || pathname === '/';
     return pathname.startsWith(href);
   };
 
+  // User info
+  const displayName = user?.firstName
+    ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ''}`
+    : user?.username || 'User';
+  const email = user?.primaryEmailAddress?.emailAddress || '';
+  const initials = user?.firstName
+    ? `${user.firstName[0]}${user.lastName?.[0] || ''}`.toUpperCase()
+    : displayName[0]?.toUpperCase() || 'U';
+  const avatarUrl = user?.imageUrl;
+
   return (
     <aside className="sidebar">
 
-      {/* ── Brand ─────────────────────────────────────────────────────── */}
+      {/* ── Brand */}
       <div className="sidebar-brand">
         <div className="sidebar-brand-mark">
           {Icons.logo}
@@ -136,7 +252,7 @@ export function Sidebar() {
         <span className="sidebar-brand-badge">Beta</span>
       </div>
 
-      {/* ── Main Nav ──────────────────────────────────────────────────── */}
+      {/* ── Main Nav */}
       <nav className="sidebar-nav-section" style={{ marginTop: '4px' }}>
         <p className="sidebar-nav-label">Menu</p>
         {NAV_ITEMS.map((item) => {
@@ -154,49 +270,141 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* ── Spacer ────────────────────────────────────────────────────── */}
+      {/* ── Spacer */}
       <div className="sidebar-spacer" />
 
-      {/* ── Credits Widget ────────────────────────────────────────────── */}
-      <div className="sidebar-credits">
-        <div>
-          <p className="sidebar-credits-title">Credits</p>
-          <p className="sidebar-credits-sub">45 / 1,000 workflow runs used</p>
-        </div>
+      {/* ── Bottom Links (open in new tab) */}
+      <div className="sidebar-bottom">
+        <a
+          href="/docs"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="sidebar-nav-item"
+        >
+          {Icons.docs}
+          Documentation
+          <span style={{ marginLeft: 'auto', opacity: 0.4, display: 'flex' }}>{Icons.externalLink}</span>
+        </a>
+        <a
+          href="/blog"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="sidebar-nav-item"
+        >
+          {Icons.blogs}
+          Blog
+          <span style={{ marginLeft: 'auto', opacity: 0.4, display: 'flex' }}>{Icons.externalLink}</span>
+        </a>
+      </div>
 
-        <div>
-          <div className="sidebar-credits-bar-bg">
-            <div className="sidebar-credits-bar-fill" />
-          </div>
-          <div className="sidebar-credits-meta" style={{ marginTop: '6px' }}>
-            <span>5% used</span>
-            <span>955 remaining</span>
-          </div>
-        </div>
+      {/* ── User Profile Widget */}
+      <div style={{ position: 'relative', padding: '0 8px 16px' }}>
+        {showDropdown && <ProfileDropdown onClose={() => setShowDropdown(false)} />}
+        <button
+          onClick={() => setShowDropdown(prev => !prev)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            width: '100%',
+            padding: '10px',
+            background: showDropdown ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.02)',
+            border: `1px solid ${showDropdown ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.06)'}`,
+            borderRadius: '10px',
+            cursor: 'pointer',
+            transition: 'background 150ms, border-color 150ms',
+            fontFamily: 'inherit',
+            textAlign: 'left',
+          }}
+          onMouseEnter={e => {
+            if (!showDropdown) {
+              (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)';
+              (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.08)';
+            }
+          }}
+          onMouseLeave={e => {
+            if (!showDropdown) {
+              (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.02)';
+              (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.06)';
+            }
+          }}
+        >
+          {/* Avatar */}
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt={displayName}
+              style={{
+                width: '30px',
+                height: '30px',
+                borderRadius: '8px',
+                objectFit: 'cover',
+                flexShrink: 0,
+              }}
+            />
+          ) : (
+            <div
+              style={{
+                width: '30px',
+                height: '30px',
+                borderRadius: '8px',
+                background: 'linear-gradient(135deg, #6366f1, #818cf8)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '11px',
+                fontWeight: 700,
+                color: '#fff',
+                flexShrink: 0,
+                letterSpacing: '0.02em',
+              }}
+            >
+              {initials}
+            </div>
+          )}
 
-        <button className="sidebar-credits-btn">
-          {Icons.zap}&nbsp; Upgrade to Starter
+          {/* Name & email */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div
+              style={{
+                fontSize: '13px',
+                fontWeight: 600,
+                color: 'rgba(255,255,255,0.85)',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                lineHeight: 1.3,
+              }}
+            >
+              {displayName}
+            </div>
+            <div
+              style={{
+                fontSize: '11px',
+                color: 'rgba(255,255,255,0.35)',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                lineHeight: 1.3,
+              }}
+            >
+              {email}
+            </div>
+          </div>
+
+          {/* Chevron */}
+          <span style={{ color: 'rgba(255,255,255,0.25)', flexShrink: 0, display: 'flex' }}>
+            {Icons.chevronUpDown}
+          </span>
         </button>
       </div>
 
-      {/* ── Bottom Links ──────────────────────────────────────────────── */}
-      <div className="sidebar-bottom">
-        <Link href="/docs" className="sidebar-nav-item">
-          {Icons.docs}
-          Documentation
-        </Link>
-        <Link href="/blogs" className="sidebar-nav-item">
-          {Icons.blogs}
-          Blog
-        </Link>
-      </div>
-
-      {/* ── User Profile ──────────────────────────────────────────────── */}
-      <div style={{ padding: '0 16px 20px', display: 'flex', alignItems: 'center' }}>
-        <UserButton appearance={clerkAppearance} />
-        <span style={{ marginLeft: '12px', fontSize: '13px', fontWeight: 500, color: 'rgba(255,255,255,0.7)' }}>Account</span>
-      </div>
-
+      <style>{`
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(4px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </aside>
   );
 }
