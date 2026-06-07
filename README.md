@@ -63,12 +63,3 @@ npm run dev
 ```
 
 Open `http://localhost:3000` in your browser.
-
-## Type Safety
-
-The application enforces a strict type contract between the frontend and backend. 
-The `NodeListItem` interface exported by the backend `NodeRegistry` maps precisely to the `NodeSummary` interface in the frontend's API client, which is subsequently extended by the UI components (e.g., `NodeCardData`).
-
-## Code Quality
-
-Both projects are configured with Prettier and strict ESLint rules (ESLint v8 for backend, ESLint v9 Flat Config for frontend) to ensure a consistent, professional codebase.
