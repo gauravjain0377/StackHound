@@ -22,7 +22,7 @@ interface NodeCardProps extends NodeCardData {
   style?: CSSProperties;
 }
 
-// ─── Type → CSS class map ──────────────────────────────────────────────────────
+// ─── Type → CSS class map
 
 const TYPE_CLASS: Record<string, string> = {
   Core: 'node-type-core',
@@ -31,8 +31,7 @@ const TYPE_CLASS: Record<string, string> = {
   Data: 'node-type-data',
 };
 
-// ─── Component ────────────────────────────────────────────────────────────────
-
+// ─── Component
 /**
  * NodeCard
  *
